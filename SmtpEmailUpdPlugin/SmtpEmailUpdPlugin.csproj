@@ -33,6 +33,7 @@
   <ItemGroup>
     <Reference Include="FabSoftUpd">
       <HintPath>C:\Program Files\FabSoft-Driver\Driver_Service\Plugins\FabSoftUpd.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
