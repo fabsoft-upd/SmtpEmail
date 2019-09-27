@@ -46,12 +46,9 @@ namespace SmtpEmailUpdPlugin
         }
         private static Stream GetEmbeddedResource(string resourceName)
         {
-            return GetEmbeddedResource(resourceName, Assembly.GetExecutingAssembly());
-        }
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            resourceName = assembly.GetName().Name + "." + resourceName.Replace(" ", "_").Replace("\\", ".").Replace("/", ".");
 
-        private static Stream GetEmbeddedResource(string resourceName, Assembly assembly)
-        {
-            resourceName = FormatResourceName(assembly, resourceName);
             using (Stream resourceStream = assembly.GetManifestResourceStream(resourceName))
             {
                 MemoryStream tmpStream = null;
@@ -63,13 +60,6 @@ namespace SmtpEmailUpdPlugin
                 }
                 return tmpStream;
             }
-        }
-
-        private static string FormatResourceName(Assembly assembly, string resourceName)
-        {
-            return assembly.GetName().Name + "." + resourceName.Replace(" ", "_")
-                                                               .Replace("\\", ".")
-                                                               .Replace("/", ".");
         }
 
         private const int LATEST_VERSION = 1;
