@@ -16,49 +16,13 @@ namespace SmtpEmailUpdPlugin
 {
     public class SampleSmtpEmailUpdPlugin : FabSoftUpd.Wizard.Workflows_v1.BaseDeliveryWorkflow
     {
-        public SampleSmtpEmailUpdPlugin()
-        {
-            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
-            BitmapImage bitmap = null;
-
-            Stream img = GetEmbeddedResource("Workflow_Icon.png");
-
-            if (img != null)
-            {
-                bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.StreamSource = img;
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.EndInit();
-                bitmap.Freeze();
-            }
-
-            _CustomIcon = bitmap;
-        }
         private static BitmapSource _CustomIcon = null;
         public override BitmapSource CustomIcon
         {
             get
             {
                 return _CustomIcon;
-            }
-        }
-        private static Stream GetEmbeddedResource(string resourceName)
-        {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            resourceName = assembly.GetName().Name + "." + resourceName.Replace(" ", "_").Replace("\\", ".").Replace("/", ".");
-
-            using (Stream resourceStream = assembly.GetManifestResourceStream(resourceName))
-            {
-                MemoryStream tmpStream = null;
-                if (resourceStream != null)
-                {
-                    tmpStream = new MemoryStream();
-                    resourceStream.CopyTo(tmpStream);
-                    resourceStream.Seek(0, SeekOrigin.Begin);
-                }
-                return tmpStream;
             }
         }
 
@@ -98,6 +62,27 @@ namespace SmtpEmailUpdPlugin
             {
                 return "Sample SMTP Email";
             }
+        }
+
+        public SampleSmtpEmailUpdPlugin()
+        {
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
+            BitmapImage bitmap = null;
+
+            Stream img = GetEmbeddedResource("Workflow_Icon.png");
+
+            if (img != null)
+            {
+                bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.StreamSource = img;
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze();
+            }
+
+            _CustomIcon = bitmap;
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -389,5 +374,24 @@ namespace SmtpEmailUpdPlugin
 
             return foundValue;
         }
+
+        private static Stream GetEmbeddedResource(string resourceName)
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            resourceName = assembly.GetName().Name + "." + resourceName.Replace(" ", "_").Replace("\\", ".").Replace("/", ".");
+
+            using (Stream resourceStream = assembly.GetManifestResourceStream(resourceName))
+            {
+                MemoryStream tmpStream = null;
+                if (resourceStream != null)
+                {
+                    tmpStream = new MemoryStream();
+                    resourceStream.CopyTo(tmpStream);
+                    resourceStream.Seek(0, SeekOrigin.Begin);
+                }
+                return tmpStream;
+            }
+        }
     }
 }
+
