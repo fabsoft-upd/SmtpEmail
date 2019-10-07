@@ -214,7 +214,7 @@ namespace SmtpEmailUpdPlugin
             return defaultProperties;
         }
 
-        public override SubmissionStatus ServiceSubmit(string jobName, string jobPath, string fclInfo, Dictionary<string, string> driverSettings, Logger externalHandler, Stream xpsStream, int pageIndexStart, int pageIndexEnd, List<PageDimensions> pageDimensions)
+        public override SubmissionStatus ServiceSubmit(string jobName, string fclInfo, Dictionary<string, string> driverSettings, Logger externalHandler, Stream xpsStream, int pageIndexStart, int pageIndexEnd, List<PageDimensions> pageDimensions)
         {
 
             AttachDebugger();
@@ -223,8 +223,8 @@ namespace SmtpEmailUpdPlugin
             status.Result = false;
             try
             {
-                string recipientEmail = GetPropertyString("Recipient_EmailAddress");
-                string recipientName = GetPropertyString("Recipient_Name");
+                string recipientEmail = GetPropertyResult("Recipient_EmailAddress", "", false);
+                string recipientName = GetPropertyResult("Recipient_Name", "", false);
                 MailAddress emailRecipient = new MailAddress(recipientEmail, recipientName);
                 status.Destination = emailRecipient.ToString();
                 using (SmtpClient smtpConn = new SmtpClient())
@@ -232,90 +232,88 @@ namespace SmtpEmailUpdPlugin
                     using (MailMessage newMessage = new MailMessage())
                     {
 
-                        smtpConn.Host = GetPropertyString("SMTP_Server");
-                        smtpConn.EnableSsl = (GetPropertyString("SMTP_SSL") == "NO" ? false : true);
+                        smtpConn.Host = GetPropertyResult("SMTP_Server", "", false);
+                        smtpConn.EnableSsl = (GetPropertyResult("SMTP_SSL", "", false) == "NO" ? false : true);
 
-                        string username = GetPropertyString("SMTP_Username");
+                        string username = GetPropertyResult("SMTP_Username", "", false);
                         if (!string.IsNullOrWhiteSpace(username))
                         {
-                            smtpConn.Credentials = new System.Net.NetworkCredential(username, GetPropertyString("SMTP_Password"));
+                            string smtpPassword = GetPropertyResult("SMTP_Password", "", false);
+                            smtpConn.Credentials = new System.Net.NetworkCredential(username, smtpPassword);
                         }
 
-                        int? portNumber = GetPropertyInteger("SMTP_Port");
-                        if (!portNumber.HasValue) { portNumber = 587; }
-                        smtpConn.Port = portNumber.Value;
+                        smtpConn.Port = GetPropertyResult("SMTP_Port", 587, false);
 
-                        newMessage.From = new MailAddress(GetPropertyString("Sender_EmailAddress"), GetPropertyString("Sender_Name"));
+                        string senderAddress = GetPropertyResult("Sender_EmailAddress", "", false);
+                        string senderName = GetPropertyResult("Sender_Name", "", false);
+                        newMessage.From = new MailAddress(senderAddress, senderName);
 
                         newMessage.To.Add(emailRecipient);
 
-                        string ccAddress = GetPropertyString("Recipient_CCEmailAddress");
+                        string ccAddress = GetPropertyResult("Recipient_CCEmailAddress", "", false);
                         if (!string.IsNullOrWhiteSpace(ccAddress))
                         {
                             newMessage.CC.Add(new MailAddress(ccAddress));
                         }
 
-                        string bccAddress = GetPropertyString("Recipient_BCCEmailAddress");
+                        string bccAddress = GetPropertyResult("Recipient_BCCEmailAddress", "", false);
                         if (!string.IsNullOrWhiteSpace(bccAddress))
                         {
                             newMessage.Bcc.Add(new MailAddress(bccAddress));
                         }
 
-                        newMessage.Subject = GetPropertyString("Message_Subject");
-                        newMessage.Body = GetPropertyString("Message_Body");
+                        newMessage.Subject = GetPropertyResult("Message_Subject", "", false);
+                        newMessage.Body = GetPropertyResult("Message_Body", "", false);
 
-                        string attachmentName = GetPropertyString("Message_Attachment_Name");
+                        string attachmentName = GetPropertyResult("Message_Attachment_Name", "", false);
                         if (string.IsNullOrWhiteSpace(attachmentName)) { attachmentName = "Document"; }
 
-                        OutputImageTypeProperty outputImageType = null;
-                        if (GetProperty("OutputImageType", out outputImageType, false))
+                        var outputImageType = GetProperty<OutputImageTypeProperty>("OutputImageType", false);
+                        if (outputImageType != null)
                         {
-                            if (outputImageType != null)
+
+                            DocumentRenderer renderingConverter = GetRenderer(outputImageType);
+
+                            if (renderingConverter != null)
                             {
-
-                                DocumentRenderer renderingConverter = GetRenderer(outputImageType);
-
-                                if (renderingConverter != null)
+                                TempFileStream outputStream = null;
+                                try
                                 {
-                                    TempFileStream outputStream = null;
                                     try
                                     {
-                                        try
-                                        {
-                                            string tempFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Temp\");
-                                            Directory.CreateDirectory(tempFolder);
-                                            outputStream = new TempFileStream(tempFolder);
-                                        }
-                                        catch (Exception)
-                                        {
-                                            //Ignore - attempt another temp location (UAC may block UI from accessing Temp folder.
-                                        }
-
-                                        if (outputStream == null)
-                                        {
-                                            string tempFolder = Path.Combine(Path.GetTempPath(), @"FS_UPD_v4\Email_SMTP\");
-                                            Directory.CreateDirectory(tempFolder);
-                                            outputStream = new TempFileStream(tempFolder);
-                                        }
-
-                                        renderingConverter.RenderXpsToOutput(xpsStream, outputStream, pageIndexStart, pageIndexEnd, externalHandler);
-
-                                        outputStream.Seek(0, SeekOrigin.Begin);
-                                        attachmentName += renderingConverter.FileExtension;
-                                        Attachment mailAttachment = new Attachment(outputStream, attachmentName);
-
-                                        newMessage.Attachments.Add(mailAttachment);
-
-
-                                        smtpConn.Send(newMessage);
+                                        string tempFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Temp\");
+                                        Directory.CreateDirectory(tempFolder);
+                                        outputStream = new TempFileStream(tempFolder);
                                     }
-                                    finally
+                                    catch (Exception)
                                     {
-                                        if (outputStream != null)
-                                        {
-                                            outputStream.Dispose();
-                                            outputStream = null;
-                                        }
+                                        //Ignore - attempt another temp location (UAC may block UI from accessing Temp folder.
+                                    }
+
+                                    if (outputStream == null)
+                                    {
+                                        string tempFolder = Path.Combine(Path.GetTempPath(), @"FS_UPD_v4\Email_SMTP\");
+                                        Directory.CreateDirectory(tempFolder);
+                                        outputStream = new TempFileStream(tempFolder);
+                                    }
+
+                                    renderingConverter.RenderXpsToOutput(xpsStream, outputStream, pageIndexStart, pageIndexEnd, externalHandler);
+
+                                    outputStream.Seek(0, SeekOrigin.Begin);
+                                    attachmentName += renderingConverter.FileExtension;
+                                    Attachment mailAttachment = new Attachment(outputStream, attachmentName);
+
+                                    newMessage.Attachments.Add(mailAttachment);
+
+
+                                    smtpConn.Send(newMessage);
+                                }
+                                finally
+                                {
+                                    if (outputStream != null)
+                                    {
+                                        outputStream.Dispose();
+                                        outputStream = null;
                                     }
                                 }
                             }
@@ -325,7 +323,6 @@ namespace SmtpEmailUpdPlugin
 
                 status.Result = true;
                 status.Message = "Successfully sent the email to " + emailRecipient.ToString();
-                status.SeverityLevel = StatusResults.SeverityLevels.OK;
                 status.StatusCode = 0;
             }
             catch (Exception ex)
@@ -342,37 +339,6 @@ namespace SmtpEmailUpdPlugin
             externalHandler.LogMessage("SMTP Email Result: " + status.Result.ToString());
 
             return status;
-        }
-
-        private string GetPropertyString(string propertyName)
-        {
-            string foundValue = "";
-
-            BaseProperty foundProperty;
-            if (GetProperty(propertyName, out foundProperty, false))
-            {
-                foundValue = foundProperty.GetResult();
-            }
-
-            return foundValue;
-        }
-
-        private int? GetPropertyInteger(string propertyName, int? defaultValue = null)
-        {
-            int? foundValue = defaultValue;
-
-            BaseProperty foundProperty;
-            if (GetProperty(propertyName, out foundProperty, false))
-            {
-                string tmps = foundProperty.GetResult();
-                int tmpv;
-                if (int.TryParse(tmps, out tmpv))
-                {
-                    foundValue = tmpv;
-                }
-            }
-
-            return foundValue;
         }
 
         private static Stream GetEmbeddedResource(string resourceName)
