@@ -34,7 +34,7 @@ namespace SmtpEmailUpdPlugin
             DocumentWorkflow upgradedWorkflow = base.UpgradeWorkflow();
             if (this.WorkflowVersion == LATEST_VERSION)
             {
-                //Upgrade Workflow
+                // Upgrade Workflow
             }
             return upgradedWorkflow;
         }
@@ -67,22 +67,34 @@ namespace SmtpEmailUpdPlugin
         public SampleSmtpEmailUpdPlugin()
         {
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-
+            
+            // Use the embedded PNG file as the workflow icon
             BitmapImage bitmap = null;
+            using (Stream img = GetEmbeddedResource("Workflow_Icon.png")) {
+                if (img != null)
+                {
+                    bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.StreamSource = img;
+                    bitmap.EndInit();
+                    bitmap.Freeze();
+                }
+            }
+            _CustomIcon = bitmap;
+        }
 
-            Stream img = GetEmbeddedResource("Workflow_Icon.png");
+        private static Stream GetEmbeddedResource(string resourceName)
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
 
-            if (img != null)
+            string fullResourceName = resourceName.Replace(" ", "_").Replace("\\", ".").Replace("/", ".");
+            if (!fullResourceName.StartsWith(assembly.GetName().Name + "."))
             {
-                bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.StreamSource = img;
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.EndInit();
-                bitmap.Freeze();
+                fullResourceName = assembly.GetName().Name + "." + fullResourceName;
             }
 
-            _CustomIcon = bitmap;
+            return assembly.GetManifestResourceStream(fullResourceName);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -216,7 +228,6 @@ namespace SmtpEmailUpdPlugin
 
         public override SubmissionStatus ServiceSubmit(string jobName, string fclInfo, Dictionary<string, string> driverSettings, Logger externalHandler, Stream xpsStream, int pageIndexStart, int pageIndexEnd, List<PageDimensions> pageDimensions)
         {
-
             AttachDebugger();
 
             SubmissionStatus status = new SubmissionStatus();
@@ -339,24 +350,6 @@ namespace SmtpEmailUpdPlugin
             externalHandler.LogMessage("SMTP Email Result: " + status.Result.ToString());
 
             return status;
-        }
-
-        private static Stream GetEmbeddedResource(string resourceName)
-        {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            resourceName = assembly.GetName().Name + "." + resourceName.Replace(" ", "_").Replace("\\", ".").Replace("/", ".");
-
-            using (Stream resourceStream = assembly.GetManifestResourceStream(resourceName))
-            {
-                MemoryStream tmpStream = null;
-                if (resourceStream != null)
-                {
-                    tmpStream = new MemoryStream();
-                    resourceStream.CopyTo(tmpStream);
-                    resourceStream.Seek(0, SeekOrigin.Begin);
-                }
-                return tmpStream;
-            }
         }
     }
 }
