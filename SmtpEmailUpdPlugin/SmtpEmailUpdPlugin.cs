@@ -129,21 +129,24 @@ namespace SmtpEmailUpdPlugin
 
             defaultProperties.Add(new StaticTextProperty("SMTP_Server", "SMTP Server Name / Address")
             {
-                UserGenerated = false
+                UserGenerated = false,
+                StatusFlags = BaseProperty.StatusFlagOptions.Visible
             });
 
             defaultProperties.Add(new StaticNumberProperty("SMTP_Port", "SMTP TCP Port")
             {
                 UserGenerated = false,
                 Value = "587",
-                IsConfigured = true
+                IsConfigured = true,
+                StatusFlags = BaseProperty.StatusFlagOptions.Visible
             });
 
             defaultProperties.Add(new StaticYesNoProperty("SMTP_SSL", "SMTP Enable TLS")
             {
                 UserGenerated = false,
                 Value = "YES",
-                IsConfigured = true
+                IsConfigured = true,
+                StatusFlags = BaseProperty.StatusFlagOptions.Visible
             });
 
             defaultProperties.Add(new StaticTextProperty("SMTP_Username", "SMTP Username")
@@ -151,7 +154,8 @@ namespace SmtpEmailUpdPlugin
                 UserGenerated = false,
                 IsRequired = false,
                 IsConfigured = true,
-                Value = ""
+                Value = "",
+                StatusFlags = BaseProperty.StatusFlagOptions.Visible
             });
 
             defaultProperties.Add(new StaticPasswordProperty("SMTP_Password", "SMTP Server Password")
@@ -165,7 +169,8 @@ namespace SmtpEmailUpdPlugin
             defaultProperties.Add(new AnyInputSourceProperty("Sender_EmailAddress", "Sender Email Address")
             {
                 UserGenerated = false,
-                CanHaveUserInteraction = true
+                CanHaveUserInteraction = true,
+                StatusFlags = BaseProperty.StatusFlagOptions.Visible
             });
 
             defaultProperties.Add(new AnyInputSourceProperty("Sender_Name", "Sender Name")
@@ -173,13 +178,15 @@ namespace SmtpEmailUpdPlugin
                 UserGenerated = false,
                 IsRequired = false,
                 IsConfigured = true,
-                CanHaveUserInteraction = true
+                CanHaveUserInteraction = true,
+                StatusFlags = BaseProperty.StatusFlagOptions.Visible
             });
 
             defaultProperties.Add(new AnyInputSourceProperty("Recipient_EmailAddress", "Recipient Email Address")
             {
                 UserGenerated = false,
-                CanHaveUserInteraction = true
+                CanHaveUserInteraction = true,
+                StatusFlags = BaseProperty.StatusFlagOptions.VisibleAndEditable
             });
 
             defaultProperties.Add(new AnyInputSourceProperty("Recipient_Name", "Recipient Name")
@@ -187,7 +194,8 @@ namespace SmtpEmailUpdPlugin
                 UserGenerated = false,
                 IsRequired = false,
                 IsConfigured = true,
-                CanHaveUserInteraction = true
+                CanHaveUserInteraction = true,
+                StatusFlags = BaseProperty.StatusFlagOptions.VisibleAndEditable
             });
 
             defaultProperties.Add(new AnyInputSourceProperty("Recipient_CCEmailAddress", "Recipient CC Email Address")
@@ -195,7 +203,8 @@ namespace SmtpEmailUpdPlugin
                 UserGenerated = false,
                 IsRequired = false,
                 IsConfigured = true,
-                CanHaveUserInteraction = true
+                CanHaveUserInteraction = true,
+                StatusFlags = BaseProperty.StatusFlagOptions.VisibleAndEditable
             });
 
             defaultProperties.Add(new AnyInputSourceProperty("Recipient_BCCEmailAddress", "Recipient BCC Email Address")
@@ -203,25 +212,29 @@ namespace SmtpEmailUpdPlugin
                 UserGenerated = false,
                 IsRequired = false,
                 IsConfigured = true,
-                CanHaveUserInteraction = true
+                CanHaveUserInteraction = true,
+                StatusFlags = BaseProperty.StatusFlagOptions.VisibleAndEditable
             });
 
             defaultProperties.Add(new AnyInputSourceProperty("Message_Subject", "Message Subject")
             {
                 UserGenerated = false,
-                CanHaveUserInteraction = true
+                CanHaveUserInteraction = true,
+                StatusFlags = BaseProperty.StatusFlagOptions.VisibleAndEditable
             });
 
             defaultProperties.Add(new AnyInputSourceProperty("Message_Body", "Message Body")
             {
                 UserGenerated = false,
-                CanHaveUserInteraction = true
+                CanHaveUserInteraction = true,
+                StatusFlags = BaseProperty.StatusFlagOptions.VisibleAndEditable
             });
 
             defaultProperties.Add(new AnyInputSourceProperty("Message_Attachment_Name", "Message Attachment Name")
             {
                 UserGenerated = false,
-                CanHaveUserInteraction = true
+                CanHaveUserInteraction = true,
+                StatusFlags = BaseProperty.StatusFlagOptions.VisibleAndEditable
             });
 
             return defaultProperties;

@@ -54,7 +54,7 @@
     <EmbeddedResource Include="Workflow_Icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
- <PropertyGroup>
+  <PropertyGroup>
     <PreBuildEvent>sc stop "FS_UniversalPrintDriver"
 taskkill /IM FS_v4_Printer_UI.exe /F  2&gt;nul 1&gt;nul
 EXIT 0</PreBuildEvent>
