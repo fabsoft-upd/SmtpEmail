@@ -240,7 +240,7 @@ namespace SmtpEmailUpdPlugin
             return defaultProperties;
         }
 
-        public override SubmissionStatus ServiceSubmit(string jobName, string fclInfo, Dictionary<string, string> driverSettings, Logger externalHandler, Stream xpsStream, int pageIndexStart, int pageIndexEnd, List<PageDimensions> pageDimensions)
+        public override SubmissionStatus ServiceSubmit(string jobName, List<KeyValuePair<string, string>> fclInfo, Dictionary<string, string> driverSettings, Logger externalHandler, Stream xpsStream, int pageIndexStart, int pageIndexEnd, List<PageDimensions> pageDimensions)
         {
             AttachDebugger();
 
