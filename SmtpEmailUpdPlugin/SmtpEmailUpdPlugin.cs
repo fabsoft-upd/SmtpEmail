@@ -17,6 +17,7 @@ namespace SmtpEmailUpdPlugin
 {
     public class SampleSmtpEmailUpdPlugin : FabSoftUpd.Wizard.Workflows_v1.BaseDeliveryWorkflow
     {
+        public override string LicenseName => "DAD_Base";
 
         private static BitmapSource _CustomIcon = null;
         public override BitmapSource CustomIcon
